@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   CalendarCheck,
@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   RotateCcw,
   X,
+  LogOut,
 } from "lucide-react";
 import { dataStore } from "@/lib/storage";
 import { useSidebar } from "@/context/SidebarContext";
@@ -27,6 +28,7 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ pendingCount = 0 }: AdminSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { isDrawerOpen, closeDrawer } = useSidebar();
 
   const navItems = [
@@ -200,6 +202,20 @@ export function AdminSidebar({ pendingCount = 0 }: AdminSidebarProps) {
             <span>Reset Demo</span>
           </button>
         </div>
+
+        {/* Logout Button */}
+        <button
+          onClick={() => {
+            if (confirm("Are you sure you want to sign out?")) {
+              dataStore.logoutAdmin();
+              router.push("/login");
+            }
+          }}
+          className="w-full mt-2 px-3 py-2 rounded-xl bg-slate-900 hover:bg-rose-500/10 border border-slate-800 hover:border-rose-500/30 text-slate-400 hover:text-rose-400 text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          <span>Sign Out</span>
+        </button>
       </div>
     </div>
   );

@@ -20,6 +20,8 @@ import {
 import { dataStore } from "@/lib/storage";
 import { SiteSetting } from "@/types";
 import { AdminHeader } from "@/components/layout/AdminHeader";
+import { getSupabaseCredentials, saveSupabaseCredentials, getSupabase } from "@/lib/supabase/client";
+import { Loader2 } from "lucide-react";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<SiteSetting[]>([]);
@@ -31,6 +33,12 @@ export default function SettingsPage() {
   const [newLabel, setNewLabel] = useState("");
   const [newCategory, setNewCategory] = useState<"general" | "contact" | "service" | "homepage">("contact");
   const [showAddModal, setShowAddModal] = useState(false);
+
+  // Supabase connection credentials
+  const [supabaseUrlInput, setSupabaseUrlInput] = useState("");
+  const [supabaseKeyInput, setSupabaseKeyInput] = useState("");
+  const [isTestingSupabase, setIsTestingSupabase] = useState(false);
+  const [supabaseStatusMsg, setSupabaseStatusMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const loadSettings = async () => {
     setLoading(true);
@@ -46,7 +54,53 @@ export default function SettingsPage() {
 
   useEffect(() => {
     loadSettings();
+    const creds = getSupabaseCredentials();
+    setSupabaseUrlInput(creds.url);
+    if (!creds.key.includes("placeholder")) {
+      setSupabaseKeyInput(creds.key);
+    }
   }, []);
+
+  const handleConnectSupabase = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supabaseKeyInput.trim()) {
+      setSupabaseStatusMsg({ type: "error", text: "Please enter your Supabase Anon Public Key." });
+      return;
+    }
+
+    setIsTestingSupabase(true);
+    setSupabaseStatusMsg(null);
+
+    try {
+      const cleanUrl = supabaseUrlInput.trim() || "https://lbfmxgnxihujjcrzhjzn.supabase.co";
+      const cleanKey = supabaseKeyInput.trim();
+      saveSupabaseCredentials(cleanUrl, cleanKey);
+
+      // Verify connection by querying site_settings table
+      const client = getSupabase();
+      const { data, error } = await client.from("site_settings").select("key").limit(1);
+
+      if (!error) {
+        setSupabaseStatusMsg({
+          type: "success",
+          text: "✅ Connected to Supabase PostgreSQL successfully! Live mode is now ACTIVE.",
+        });
+        await loadSettings();
+      } else {
+        setSupabaseStatusMsg({
+          type: "error",
+          text: `Connection failed: ${error.message}. Please verify the Anon key or run the setup SQL script in Supabase.`,
+        });
+      }
+    } catch (err: any) {
+      setSupabaseStatusMsg({
+        type: "error",
+        text: `Error connecting: ${err.message}`,
+      });
+    } finally {
+      setIsTestingSupabase(false);
+    }
+  };
 
   const handleValueChange = (key: string, value: string) => {
     setSettings((prev) =>
@@ -170,6 +224,98 @@ export default function SettingsPage() {
             </span>
           </div>
         )}
+
+        {/* Supabase Live API Connection Card */}
+        <div className="bg-[#0c1220] border border-slate-800 rounded-2xl overflow-hidden p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <div className="flex items-center gap-2.5">
+              <Database className="w-5 h-5 text-amber-400" />
+              <div>
+                <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+                  Supabase PostgreSQL Live Database Gateway
+                </h2>
+                <p className="text-xs text-slate-400">
+                  Connect your live Supabase credentials to switch from Demo mode to Live mode
+                </p>
+              </div>
+            </div>
+            <div
+              className={`px-3 py-1 rounded-xl text-xs font-bold border flex items-center gap-1.5 ${
+                isLive
+                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                  : "bg-amber-500/10 text-amber-400 border-amber-500/30 animate-pulse"
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full ${isLive ? "bg-emerald-400 animate-ping" : "bg-amber-400"}`}></span>
+              <span>{isLive ? "● LIVE DATABASE ACTIVE" : "○ DEMO STORAGE MODE"}</span>
+            </div>
+          </div>
+
+          {supabaseStatusMsg && (
+            <div
+              className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
+                supabaseStatusMsg.type === "success"
+                  ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-300"
+                  : "bg-rose-500/10 border border-rose-500/30 text-rose-300"
+              }`}
+            >
+              <span>{supabaseStatusMsg.text}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleConnectSupabase} className="space-y-3 text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-slate-300 font-bold block mb-1">Supabase Project URL</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="https://lbfmxgnxihujjcrzhjzn.supabase.co"
+                  value={supabaseUrlInput}
+                  onChange={(e) => setSupabaseUrlInput(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-300 font-bold block mb-1">
+                  Supabase Anon Public Key (anon key)
+                </label>
+                <input
+                  type="password"
+                  required
+                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  value={supabaseKeyInput}
+                  onChange={(e) => setSupabaseKeyInput(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-amber-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2">
+              <p className="text-[11px] text-slate-500">
+                Pasted key is securely stored in your browser session and connects directly to your PostgreSQL database.
+              </p>
+              <button
+                type="submit"
+                disabled={isTestingSupabase}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-600/20 transition-all cursor-pointer disabled:opacity-60 shrink-0"
+              >
+                {isTestingSupabase ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Testing Connection...</span>
+                  </>
+                ) : (
+                  <>
+                    <Database className="w-3.5 h-3.5" />
+                    <span>Connect & Switch to Supabase Live</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
 
         {/* Category: Contact & Communication */}
         <div className="bg-[#0c1220] border border-slate-800 rounded-2xl overflow-hidden p-6 space-y-6">

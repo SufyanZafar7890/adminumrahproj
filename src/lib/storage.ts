@@ -450,6 +450,73 @@ export const dataStore = {
     };
   },
 
+  // 10. AUTHENTICATION (Hardcoded Admin Credentials in Supabase with fallback)
+  async loginAdmin(username: string, password: string): Promise<{ success: boolean; message?: string }> {
+    const cleanUser = username.trim();
+    const cleanPass = password.trim();
+
+    if (!cleanUser || !cleanPass) {
+      return { success: false, message: "Please enter both username and password." };
+    }
+
+    // 1. Check live Supabase public.admin_users table if configured
+    if (this.isLiveMode()) {
+      try {
+        const { data, error } = await supabase
+          .from("admin_users")
+          .select("id, username, role")
+          .eq("username", cleanUser)
+          .eq("password", cleanPass)
+          .maybeSingle();
+
+        if (!error && data) {
+          const session = {
+            id: data.id,
+            username: data.username,
+            role: data.role || "admin",
+            source: "supabase_db",
+            token: "sb-auth-" + Date.now(),
+          };
+          setLocalStorage(STORAGE_KEYS.AUTH, session);
+          return { success: true };
+        }
+      } catch (err) {
+        console.warn("Supabase auth check note:", err);
+      }
+    }
+
+    // 2. Default hardcoded admin credentials fallback
+    if (cleanUser === "admin" && cleanPass === "umrah@admin2026") {
+      const session = {
+        id: "usr-admin-default",
+        username: "admin",
+        role: "superadmin",
+        source: "system_default",
+        token: "def-auth-" + Date.now(),
+      };
+      setLocalStorage(STORAGE_KEYS.AUTH, session);
+      return { success: true };
+    }
+
+    return {
+      success: false,
+      message: "Invalid credentials. Please verify your username and password.",
+    };
+  },
+
+  getAdminSession(): { username: string; role: string; token: string } | null {
+    return getLocalStorage<{ username: string; role: string; token: string } | null>(
+      STORAGE_KEYS.AUTH,
+      null
+    );
+  },
+
+  logoutAdmin(): void {
+    if (typeof window === "undefined") return;
+    window.localStorage.removeItem(STORAGE_KEYS.AUTH);
+    window.dispatchEvent(new Event("storage_updated"));
+  },
+
   // Factory Reset
   resetToDefaultSeed(): void {
     if (typeof window === "undefined") return;
