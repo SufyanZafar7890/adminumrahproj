@@ -128,14 +128,14 @@ export default function SettingsPage() {
   };
 
   const handleSaveAll = async () => {
+    if (savingKey) return;
     setSavingKey("all");
     setSaveErrorMsg(null);
     try {
-      for (const item of settings) {
-        await dataStore.updateSetting(item.key, item.value);
-      }
+      await dataStore.saveAllSettings(settings);
       setSavedSuccessKey("all");
-      setTimeout(() => setSavedSuccessKey(null), 3000);
+      setTimeout(() => setSavedSuccessKey(null), 3500);
+      await loadSettings();
     } catch (err: any) {
       console.error("Failed saving all settings:", err);
       setSaveErrorMsg(err.message || "Failed to save settings to Supabase.");
@@ -203,11 +203,24 @@ export default function SettingsPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={handleSaveAll}
-              disabled={savingKey === "all"}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md transition-all cursor-pointer"
+              disabled={savingKey !== null}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-slate-950 font-bold text-xs shadow-md transition-all ${
+                savingKey === "all"
+                  ? "bg-amber-400 opacity-80 cursor-wait"
+                  : "bg-amber-500 hover:bg-amber-400 cursor-pointer disabled:opacity-50"
+              }`}
             >
-              <Save className="w-4 h-4" />
-              <span>{savingKey === "all" ? "Saving..." : "Save All Changes"}</span>
+              {savingKey === "all" ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                  <span>Saving All Changes...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  <span>Save All Changes</span>
+                </>
+              )}
             </button>
             <button
               onClick={() => setShowAddModal(true)}

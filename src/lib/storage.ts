@@ -440,6 +440,49 @@ export const dataStore = {
     }
   },
 
+  async saveAllSettings(items: SiteSetting[]): Promise<void> {
+    const now = new Date().toISOString();
+    const updatedList = items.map((item) => ({ ...item, updated_at: now }));
+    setLocalStorage(STORAGE_KEYS.SETTINGS, updatedList);
+
+    if (this.isLiveMode()) {
+      const updatePromises = items.map(async (item) => {
+        try {
+          const { data, error } = await supabase
+            .from("site_settings")
+            .update({ value: item.value, updated_at: now })
+            .eq("key", item.key)
+            .select();
+
+          if (error) {
+            console.warn(`Update failed for ${item.key}:`, error);
+          } else if (!data || data.length === 0) {
+            await supabase.from("site_settings").insert([
+              {
+                key: item.key,
+                value: item.value,
+                label: item.label || item.key,
+                category: item.category || "general",
+                updated_at: now,
+              },
+            ]);
+          }
+        } catch (e) {
+          console.error(`Exception saving setting ${item.key}:`, e);
+        }
+      });
+
+      // 6-second timeout safety guard so button never gets stuck
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Supabase parallel update timeout")), 6000)
+      );
+
+      await Promise.race([Promise.all(updatePromises), timeoutPromise]).catch((err) => {
+        console.warn("Parallel save note:", err);
+      });
+    }
+  },
+
   // 9. METRICS CALCULATOR
   async getMetrics(): Promise<DashboardMetrics> {
     const bookings = await this.getBookings();
