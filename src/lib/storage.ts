@@ -409,13 +409,32 @@ export const dataStore = {
     const index = settings.findIndex((s) => s.key === key);
     if (index >= 0) {
       settings[index] = { ...settings[index], value, updated_at: new Date().toISOString() };
-      setLocalStorage(STORAGE_KEYS.SETTINGS, settings);
+    } else {
+      settings.push({ id: `set-${Date.now()}`, key, value, label: key, category: "general", updated_at: new Date().toISOString() });
+    }
+    setLocalStorage(STORAGE_KEYS.SETTINGS, settings);
 
-      if (this.isLiveMode()) {
-        try {
-          await supabase.from("site_settings").update({ value }).eq("key", key);
-        } catch (e) {
-          console.error("Supabase settings update failed", e);
+    if (this.isLiveMode()) {
+      // 1. Try update first on matching key
+      const { data, error: updateError } = await supabase
+        .from("site_settings")
+        .update({ value, updated_at: new Date().toISOString() })
+        .eq("key", key)
+        .select();
+
+      if (updateError) {
+        console.error("Supabase settings update failed:", updateError);
+        throw new Error(`Supabase RLS/Update Error: ${updateError.message}`);
+      }
+
+      // 2. If row did not exist yet, insert it
+      if (!data || data.length === 0) {
+        const { error: insertError } = await supabase
+          .from("site_settings")
+          .insert([{ key, value, label: key, category: "general", updated_at: new Date().toISOString() }]);
+        if (insertError) {
+          console.error("Supabase settings insert failed:", insertError);
+          throw new Error(`Supabase Insert Error: ${insertError.message}`);
         }
       }
     }

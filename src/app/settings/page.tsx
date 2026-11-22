@@ -28,6 +28,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [savedSuccessKey, setSavedSuccessKey] = useState<string | null>(null);
+  const [saveErrorMsg, setSaveErrorMsg] = useState<string | null>(null);
   const [newKey, setNewKey] = useState("");
   const [newValue, setNewValue] = useState("");
   const [newLabel, setNewLabel] = useState("");
@@ -113,12 +114,14 @@ export default function SettingsPage() {
     if (!item) return;
 
     setSavingKey(key);
+    setSaveErrorMsg(null);
     try {
       await dataStore.updateSetting(key, item.value);
       setSavedSuccessKey(key);
       setTimeout(() => setSavedSuccessKey(null), 3000);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to save setting:", err);
+      setSaveErrorMsg(err.message || "Failed to save setting in Supabase.");
     } finally {
       setSavingKey(null);
     }
@@ -126,14 +129,16 @@ export default function SettingsPage() {
 
   const handleSaveAll = async () => {
     setSavingKey("all");
+    setSaveErrorMsg(null);
     try {
       for (const item of settings) {
         await dataStore.updateSetting(item.key, item.value);
       }
       setSavedSuccessKey("all");
       setTimeout(() => setSavedSuccessKey(null), 3000);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed saving all settings:", err);
+      setSaveErrorMsg(err.message || "Failed to save settings to Supabase.");
     } finally {
       setSavingKey(null);
     }
@@ -219,9 +224,22 @@ export default function SettingsPage() {
             <CheckCircle2 className="w-4 h-4" />
             <span>
               {savedSuccessKey === "all"
-                ? "All settings have been successfully updated!"
-                : `Setting "${savedSuccessKey}" saved successfully!`}
+                ? "All settings have been successfully updated in Supabase!"
+                : `Setting "${savedSuccessKey}" saved successfully in Supabase!`}
             </span>
+          </div>
+        )}
+
+        {saveErrorMsg && (
+          <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs rounded-xl flex items-center gap-2 animate-fadeIn">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+            <div className="flex-1">
+              <span className="font-bold block">Supabase Permission / RLS Error:</span>
+              <span>{saveErrorMsg}</span>
+              <p className="mt-1 text-[11px] text-rose-400/90">
+                Tip: Run the RLS Policy fix query in your Supabase SQL Editor to grant update permissions.
+              </p>
+            </div>
           </div>
         )}
 
@@ -330,16 +348,23 @@ export default function SettingsPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* WhatsApp Dispatch Number */}
+            {/* WhatsApp Dispatch Number & Direct Contact */}
             {settings
-              .filter((s) => s.key === "whatsapp_number" || s.key === "contact_phone" || s.key === "contact_email")
+              .filter(
+                (s) =>
+                  s.key === "whatsapp_number" ||
+                  s.key === "phone_number" ||
+                  s.key === "contact_phone" ||
+                  s.key === "support_email" ||
+                  s.key === "contact_email"
+              )
               .map((s) => (
                 <div key={s.key} className="space-y-1.5 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
                       {s.key === "whatsapp_number" && <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />}
-                      {s.key === "contact_phone" && <Phone className="w-3.5 h-3.5 text-amber-400" />}
-                      {s.key === "contact_email" && <Mail className="w-3.5 h-3.5 text-blue-400" />}
+                      {(s.key === "phone_number" || s.key === "contact_phone") && <Phone className="w-3.5 h-3.5 text-amber-400" />}
+                      {(s.key === "support_email" || s.key === "contact_email") && <Mail className="w-3.5 h-3.5 text-blue-400" />}
                       <span>{s.label || s.key}</span>
                     </label>
                     <span className="font-mono text-[10px] text-slate-500">{s.key}</span>
@@ -362,8 +387,8 @@ export default function SettingsPage() {
                   </div>
                   <p className="text-[11px] text-slate-400">
                     {s.key === "whatsapp_number" && "Format with country code without + or spaces (e.g. 966591206299)"}
-                    {s.key === "contact_phone" && "Formatted phone display with spaces for pilgrim hotline"}
-                    {s.key === "contact_email" && "Inbound support mailbox"}
+                    {(s.key === "phone_number" || s.key === "contact_phone") && "Formatted phone display with spaces for pilgrim hotline"}
+                    {(s.key === "support_email" || s.key === "contact_email") && "Inbound support mailbox"}
                   </p>
                 </div>
               ))}
@@ -431,7 +456,9 @@ export default function SettingsPage() {
                   !s.key.includes("address") &&
                   s.key !== "whatsapp_number" &&
                   s.key !== "contact_phone" &&
-                  s.key !== "contact_email"
+                  s.key !== "contact_email" &&
+                  s.key !== "phone_number" &&
+                  s.key !== "support_email"
               )
               .map((s) => (
                 <div key={s.key} className="space-y-1.5 bg-slate-900/50 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
