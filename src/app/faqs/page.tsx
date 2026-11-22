@@ -135,11 +135,10 @@ export default function FAQsPage() {
           {filteredFaqs.map((f) => (
             <div
               key={f.id}
-              className={`p-4 rounded-2xl border transition-all ${
-                f.is_active
+              className={`p-4 rounded-2xl border transition-all ${f.is_active
                   ? "bg-[#0c1220] border-slate-800 hover:border-slate-700 shadow-sm"
                   : "bg-slate-950/60 border-slate-800/40 opacity-60"
-              }`}
+                }`}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1.5 flex-1">
@@ -156,11 +155,10 @@ export default function FAQsPage() {
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => handleToggleActive(f)}
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full border cursor-pointer ${
-                      f.is_active
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full border cursor-pointer ${f.is_active
                         ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
                         : "bg-rose-500/20 text-rose-400 border-rose-500/30"
-                    }`}
+                      }`}
                   >
                     {f.is_active ? "Active" : "Hidden"}
                   </button>
