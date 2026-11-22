@@ -194,7 +194,7 @@ export default function BookingsPage() {
         onOpenNewBooking={openCreateModal}
       />
 
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Filters and Search Bar */}
         <div className="bg-[#0c1220] border border-slate-800 p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex-1 w-full md:w-auto relative">

@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import { AdminSidebar } from "./AdminSidebar";
+import { SidebarProvider } from "@/context/SidebarContext";
 import { dataStore } from "@/lib/storage";
 
-export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
+function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const [pendingCount, setPendingCount] = useState<number>(0);
 
   const loadPending = async () => {
@@ -34,9 +35,17 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen bg-[#090d16] text-slate-100 antialiased selection:bg-amber-500 selection:text-black">
       <AdminSidebar pendingCount={pendingCount} />
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      <div className="flex-1 flex flex-col min-w-0 w-full overflow-x-hidden">
         <main className="flex-1">{children}</main>
       </div>
     </div>
+  );
+}
+
+export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider>
+      <AdminLayoutInner>{children}</AdminLayoutInner>
+    </SidebarProvider>
   );
 }

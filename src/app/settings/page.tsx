@@ -109,7 +109,7 @@ export default function SettingsPage() {
         onRefresh={loadSettings}
       />
 
-      <div className="p-6 max-w-6xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-4 sm:space-y-6">
         {/* Supabase Sync Banner */}
         <div
           className={`p-4 rounded-2xl border flex items-center justify-between ${

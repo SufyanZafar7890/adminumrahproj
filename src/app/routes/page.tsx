@@ -128,7 +128,7 @@ export default function RoutesPage() {
         onOpenNewBooking={openAddModal}
       />
 
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-4 sm:space-y-6">
         <div className="flex items-center justify-between">
           <div className="text-xs text-slate-400">
             Total Corridors: <span className="text-white font-bold">{routes.length} Routes</span> (

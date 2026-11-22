@@ -108,7 +108,7 @@ export default function FAQsPage() {
         onOpenNewBooking={openAddModal}
       />
 
-      <div className="p-6 max-w-6xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-4 sm:space-y-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="w-full md:w-80 relative">
             <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-500" />

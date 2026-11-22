@@ -16,8 +16,10 @@ import {
   PhoneCall,
   ShieldCheck,
   RotateCcw,
+  X,
 } from "lucide-react";
 import { dataStore } from "@/lib/storage";
+import { useSidebar } from "@/context/SidebarContext";
 
 interface AdminSidebarProps {
   pendingCount?: number;
@@ -25,6 +27,7 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ pendingCount = 0 }: AdminSidebarProps) {
   const pathname = usePathname();
+  const { isDrawerOpen, closeDrawer } = useSidebar();
 
   const navItems = [
     {
@@ -90,13 +93,13 @@ export function AdminSidebar({ pendingCount = 0 }: AdminSidebarProps) {
     }
   };
 
-  return (
-    <aside className="w-64 bg-[#0c1220] border-r border-slate-800 flex flex-col justify-between shrink-0 h-screen sticky top-0 overflow-y-auto">
+  const renderSidebarContent = (isMobile: boolean = false) => (
+    <div className="flex flex-col justify-between h-full">
       <div>
         {/* Brand / Logo Header */}
-        <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-slate-800/80 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-amber-400 flex items-center justify-center shadow-lg shadow-amber-500/20 text-black font-black text-xl">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-amber-400 flex items-center justify-center shadow-lg shadow-amber-500/20 text-black font-black text-xl shrink-0">
               🕋
             </div>
             <div>
@@ -109,10 +112,21 @@ export function AdminSidebar({ pendingCount = 0 }: AdminSidebarProps) {
               <p className="text-[11px] text-slate-400 font-medium">Dispatch Operations</p>
             </div>
           </div>
+
+          {/* Close button for mobile drawer */}
+          {isMobile && (
+            <button
+              onClick={closeDrawer}
+              aria-label="Close Navigation Drawer"
+              className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition-all cursor-pointer"
+            >
+              <X className="w-5 h-5 text-amber-400" />
+            </button>
+          )}
         </div>
 
         {/* Realtime Status Indicator */}
-        <div className="mx-4 my-3 px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+        <div className="mx-3 sm:mx-4 my-3 px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -134,6 +148,9 @@ export function AdminSidebar({ pendingCount = 0 }: AdminSidebarProps) {
               <Link
                 key={item.name}
                 href={item.href}
+                onClick={() => {
+                  if (isMobile) closeDrawer();
+                }}
                 className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                   isActive
                     ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 font-bold"
@@ -177,13 +194,40 @@ export function AdminSidebar({ pendingCount = 0 }: AdminSidebarProps) {
           <button
             onClick={handleResetData}
             title="Reset demo data to default initial state"
-            className="flex items-center gap-1 text-slate-500 hover:text-amber-400 transition-colors"
+            className="flex items-center gap-1 text-slate-500 hover:text-amber-400 transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3 h-3" />
             <span>Reset Demo</span>
           </button>
         </div>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* 1. Desktop Permanent Sidebar (lg and up) */}
+      <aside className="w-64 bg-[#0c1220] border-r border-slate-800 shrink-0 h-screen sticky top-0 overflow-y-auto hidden lg:flex flex-col justify-between">
+        {renderSidebarContent(false)}
+      </aside>
+
+      {/* 2. Mobile Drawer & Backdrop (below lg) */}
+      {isDrawerOpen && (
+        <div
+          onClick={closeDrawer}
+          className="fixed inset-0 z-40 bg-black/80 backdrop-blur-xs transition-opacity duration-300 lg:hidden"
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Mobile Drawer Panel */}
+      <div
+        className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] bg-[#0c1220] border-r border-slate-800 shadow-2xl transition-transform duration-300 ease-in-out lg:hidden overflow-y-auto ${
+          isDrawerOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
+        }`}
+      >
+        {renderSidebarContent(true)}
+      </div>
+    </>
   );
 }
