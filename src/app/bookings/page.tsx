@@ -75,6 +75,17 @@ export default function BookingsPage() {
     return () => window.removeEventListener("storage_updated", handleUpdate);
   }, []);
 
+  useEffect(() => {
+    if (isEditing || isCreating) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isEditing, isCreating]);
+
   const handleStatusChange = async (id: string, newStatus: BookingStatus) => {
     await dataStore.updateBooking(id, { status: newStatus });
     await loadData();
@@ -375,8 +386,8 @@ export default function BookingsPage() {
 
       {/* Modal: Edit Booking */}
       {isEditing && selectedBooking && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <form onSubmit={handleSaveEdit} className="bg-[#0c1220] border border-slate-700 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <form onSubmit={handleSaveEdit} className="bg-[#0c1220] border border-slate-700 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] my-auto overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div>
                 <span className="text-xs font-mono font-bold text-amber-400">{selectedBooking.booking_reference}</span>
@@ -551,8 +562,8 @@ export default function BookingsPage() {
 
       {/* Modal: Create New Booking Lead */}
       {isCreating && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <form onSubmit={handleCreateNew} className="bg-[#0c1220] border border-slate-700 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <form onSubmit={handleCreateNew} className="bg-[#0c1220] border border-slate-700 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] my-auto overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
                 <Plus className="w-4 h-4 text-amber-400" />

@@ -47,6 +47,17 @@ export default function DriversPage() {
     loadDrivers();
   }, []);
 
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isModalOpen]);
+
   const openAddModal = () => {
     setEditingDriver(null);
     setFormData({
@@ -201,12 +212,12 @@ export default function DriversPage() {
 
       {/* Modal: Add / Edit Driver */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
           <form
             onSubmit={handleSubmit}
-            className="bg-[#0c1220] border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4"
+            className="bg-[#0c1220] border border-slate-700 rounded-2xl max-w-md w-full shadow-2xl flex flex-col max-h-[90vh] my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-150"
           >
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-800 p-5 pb-4 shrink-0 bg-[#0c1220]">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
                 <Users2 className="w-4 h-4 text-amber-400" />
                 <span>{editingDriver ? "Edit Chauffeur" : "Add New Chauffeur"}</span>
@@ -214,13 +225,13 @@ export default function DriversPage() {
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            <div className="space-y-3 text-xs">
+            <div className="p-5 space-y-3.5 text-xs overflow-y-auto flex-1 overscroll-contain">
               <div>
                 <label className="text-slate-300 font-semibold block mb-1">Chauffeur Full Name *</label>
                 <input
@@ -286,17 +297,17 @@ export default function DriversPage() {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-2">
+            <div className="p-5 pt-3 border-t border-slate-800 flex items-center justify-end gap-2 bg-[#0c1220] shrink-0">
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl"
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-xl"
+                className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-xl transition-all shadow-md shadow-amber-500/10 cursor-pointer"
               >
                 Save Chauffeur
               </button>

@@ -68,6 +68,17 @@ export default function DashboardPage() {
     return () => window.removeEventListener("storage_updated", handleUpdate);
   }, []);
 
+  useEffect(() => {
+    if (selectedBooking) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [selectedBooking]);
+
   const handleStatusChange = async (id: string, newStatus: any) => {
     await dataStore.updateBooking(id, { status: newStatus });
     await loadData();
@@ -361,8 +372,8 @@ export default function DashboardPage() {
 
       {/* Booking Details Modal */}
       {selectedBooking && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-[#0c1220] border border-slate-700 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-[#0c1220] border border-slate-700 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative space-y-4 max-h-[90vh] my-auto overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div>
                 <span className="text-[11px] font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
