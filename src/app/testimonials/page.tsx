@@ -13,6 +13,7 @@ import {
 import { dataStore } from "@/lib/storage";
 import { Testimonial } from "@/types";
 import { AdminHeader } from "@/components/layout/AdminHeader";
+import { generateUUID } from "@/lib/utils";
 
 export default function TestimonialsPage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -86,7 +87,7 @@ export default function TestimonialsPage() {
     if (!formData.name || !formData.review_text) return;
 
     const testimonialToSave: Testimonial = {
-      id: editingTestimonial ? editingTestimonial.id : `test-${Date.now()}`,
+      id: editingTestimonial ? editingTestimonial.id : generateUUID(),
       name: formData.name,
       country: formData.country || "Pilgrim",
       rating: Number(formData.rating) || 5,

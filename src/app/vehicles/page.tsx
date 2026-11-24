@@ -22,6 +22,7 @@ import { dataStore } from "@/lib/storage";
 import { Vehicle } from "@/types";
 import { AdminHeader } from "@/components/layout/AdminHeader";
 import { getSupabase } from "@/lib/supabase/client";
+import { generateUUID } from "@/lib/utils";
 
 export default function VehiclesPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -161,7 +162,7 @@ export default function VehiclesPage() {
       .filter(Boolean);
 
     const vehicleToSave: Vehicle = {
-      id: editingVehicle ? editingVehicle.id : `veh-${Date.now()}`,
+      id: editingVehicle ? editingVehicle.id : generateUUID(),
       name: formData.name || "Untitled Vehicle",
       category: formData.category || "Sedan",
       max_passengers: Number(formData.max_passengers) || 4,

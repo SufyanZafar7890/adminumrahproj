@@ -12,6 +12,7 @@ import {
 import { dataStore } from "@/lib/storage";
 import { FAQ } from "@/types";
 import { AdminHeader } from "@/components/layout/AdminHeader";
+import { generateUUID } from "@/lib/utils";
 
 export default function FAQsPage() {
   const [faqs, setFaqs] = useState<FAQ[]>([]);
@@ -80,7 +81,7 @@ export default function FAQsPage() {
     if (!formData.question || !formData.answer) return;
 
     const faqToSave: FAQ = {
-      id: editingFaq ? editingFaq.id : `faq-${Date.now()}`,
+      id: editingFaq ? editingFaq.id : generateUUID(),
       question: formData.question,
       answer: formData.answer,
       category: formData.category || "General",

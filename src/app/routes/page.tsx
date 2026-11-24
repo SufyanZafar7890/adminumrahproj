@@ -14,6 +14,7 @@ import {
 import { dataStore } from "@/lib/storage";
 import { Route } from "@/types";
 import { AdminHeader } from "@/components/layout/AdminHeader";
+import { generateUUID } from "@/lib/utils";
 
 export default function RoutesPage() {
   const [routes, setRoutes] = useState<Route[]>([]);
@@ -102,7 +103,7 @@ export default function RoutesPage() {
         .replace(/(^-|-$)+/g, "");
 
     const routeToSave: Route = {
-      id: editingRoute ? editingRoute.id : `rt-${Date.now()}`,
+      id: editingRoute ? editingRoute.id : generateUUID(),
       slug,
       title: formData.title,
       origin_city: formData.origin_city || "Jeddah",
