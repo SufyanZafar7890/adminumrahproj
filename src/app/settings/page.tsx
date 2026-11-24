@@ -301,7 +301,7 @@ export default function SettingsPage() {
               <div className="flex items-center gap-2">
                 <input
                   type="email"
-                  placeholder="e.g. dispatch@umrahtaxionline.com"
+                  placeholder="e.g. dispatch@makkahmadinahziyarat.com"
                   value={settings.find((s) => s.key === "support_email")?.value || ""}
                   onChange={(e) => handleValueChange("support_email", e.target.value)}
                   className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-amber-500"

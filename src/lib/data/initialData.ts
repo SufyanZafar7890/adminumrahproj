@@ -554,7 +554,7 @@ export const INITIAL_SETTINGS: SiteSetting[] = [
   {
     id: "set-3",
     key: "support_email",
-    value: "dispatch@umrahtaxionline.com",
+    value: "dispatch@makkahmadinahziyarat.com",
     label: "Operations & Dispatch Email",
     category: "contact",
   },
