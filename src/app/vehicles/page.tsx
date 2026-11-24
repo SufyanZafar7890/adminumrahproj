@@ -264,11 +264,12 @@ export default function VehiclesPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Toyota Camry (Sedan)"
+                  placeholder="e.g. GMC Yukon XL 2025"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Vehicle name and model year displayed to pilgrims</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -284,15 +285,18 @@ export default function VehiclesPage() {
                     <option value="VIP SUV">VIP SUV</option>
                     <option value="Minibus">Minibus</option>
                   </select>
+                  <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Fleet tier classification</p>
                 </div>
                 <div>
                   <label className="text-slate-300 font-semibold block mb-1">Display Order</label>
                   <input
                     type="number"
+                    placeholder="e.g. 1"
                     value={formData.display_order}
                     onChange={(e) => setFormData({ ...formData, display_order: Number(e.target.value) })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                   />
+                  <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Sort priority (lower number displays first)</p>
                 </div>
               </div>
 
@@ -302,20 +306,24 @@ export default function VehiclesPage() {
                   <input
                     type="number"
                     required
+                    placeholder="e.g. 7"
                     value={formData.max_passengers}
                     onChange={(e) => setFormData({ ...formData, max_passengers: Number(e.target.value) })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                   />
+                  <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Maximum passenger seating capacity</p>
                 </div>
                 <div>
                   <label className="text-slate-300 font-semibold block mb-1">Max Luggage (Bags)</label>
                   <input
                     type="number"
                     required
+                    placeholder="e.g. 6"
                     value={formData.max_luggage}
                     onChange={(e) => setFormData({ ...formData, max_luggage: Number(e.target.value) })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                   />
+                  <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Standard suitcase trunk capacity</p>
                 </div>
               </div>
 
@@ -329,6 +337,7 @@ export default function VehiclesPage() {
                   onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono text-[11px]"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Direct image web link for fleet showcase cards</p>
               </div>
 
               <div>
@@ -342,6 +351,7 @@ export default function VehiclesPage() {
                   onChange={(e) => setFeaturesInput(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: List amenities separated by commas</p>
               </div>
 
               <div className="flex items-center gap-2 pt-1">

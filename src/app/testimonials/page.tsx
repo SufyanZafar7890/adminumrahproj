@@ -236,6 +236,7 @@ export default function TestimonialsPage() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Pilgrim customer name</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -243,11 +244,12 @@ export default function TestimonialsPage() {
                   <label className="text-slate-300 font-semibold block mb-1">Country / City</label>
                   <input
                     type="text"
-                    placeholder="e.g. United Kingdom"
+                    placeholder="e.g. Birmingham, United Kingdom"
                     value={formData.country}
                     onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                   />
+                  <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Pilgrim's home location</p>
                 </div>
                 <div>
                   <label className="text-slate-300 font-semibold block mb-1">Rating (Stars)</label>
@@ -260,6 +262,7 @@ export default function TestimonialsPage() {
                     <option value={4}>4 Stars - Very Good</option>
                     <option value={3}>3 Stars - Average</option>
                   </select>
+                  <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Review score (1-5)</p>
                 </div>
               </div>
 
@@ -268,11 +271,12 @@ export default function TestimonialsPage() {
                 <textarea
                   rows={4}
                   required
-                  placeholder="Write the pilgrim's feedback..."
+                  placeholder="Write the pilgrim's feedback (e.g. Masha'Allah exceptional chauffeur service! Punctual at KAIA airport...)"
                   value={formData.review_text}
                   onChange={(e) => setFormData({ ...formData, review_text: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Genuine testimonial quotes for trust building</p>
               </div>
 
               <div>
@@ -284,6 +288,7 @@ export default function TestimonialsPage() {
                   onChange={(e) => setFormData({ ...formData, trip_date: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Travel period</p>
               </div>
 
               <div className="flex items-center gap-6 pt-1">

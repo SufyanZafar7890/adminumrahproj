@@ -540,14 +540,14 @@ export const INITIAL_SETTINGS: SiteSetting[] = [
   {
     id: "set-1",
     key: "whatsapp_number",
-    value: "923086819634",
-    label: "WhatsApp Dispatch Number (Country code + phone)",
+    value: "923160424995",
+    label: "Official Contact & WhatsApp Dispatch Hotline",
     category: "contact",
   },
   {
     id: "set-2",
     key: "phone_number",
-    value: "+966 59 120 6299",
+    value: "923160424995",
     label: "Hotline Phone Number",
     category: "contact",
   },

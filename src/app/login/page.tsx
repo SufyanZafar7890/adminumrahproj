@@ -17,8 +17,8 @@ import { dataStore } from "@/lib/storage";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState("admin");
-  const [password, setPassword] = useState("umrah@admin2026");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -104,12 +104,15 @@ export default function LoginPage() {
                 <input
                   type="text"
                   required
-                  placeholder="admin"
+                  placeholder="Enter admin username (e.g. admin)..."
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-white font-medium focus:outline-none focus:border-amber-500"
                 />
               </div>
+              <p className="text-[11px] text-slate-400">
+                💡 Hint: Enter your database administrator username registered in Supabase.
+              </p>
             </div>
 
             {/* Password Input */}
@@ -120,7 +123,7 @@ export default function LoginPage() {
                 <input
                   type={showPassword ? "text" : "password"}
                   required
-                  placeholder="••••••••••••"
+                  placeholder="Enter your secure password..."
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-10 py-2.5 text-white font-mono focus:outline-none focus:border-amber-500"
@@ -133,6 +136,9 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              <p className="text-[11px] text-slate-400">
+                💡 Hint: Enter your confidential admin password (strictly verified against database).
+              </p>
             </div>
 
             {/* Submit Button */}
@@ -144,7 +150,7 @@ export default function LoginPage() {
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Verifying Credentials...</span>
+                  <span>Verifying Credentials with Supabase...</span>
                 </>
               ) : (
                 <>
@@ -155,18 +161,15 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Credentials Info Note */}
-          <div className="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 space-y-1">
+          {/* Database Verification Note */}
+          <div className="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 space-y-1.5">
             <div className="flex items-center gap-1.5 text-slate-300 font-semibold">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Hardcoded Admin Credentials:</span>
+              <span>Strict Database Authentication</span>
             </div>
-            <p className="font-mono text-amber-400 bg-slate-950/80 px-2.5 py-1.5 rounded-lg border border-slate-800">
-              User: <span className="font-bold text-white">admin</span> • Pass:{" "}
-              <span className="font-bold text-white">umrah@admin2026</span>
-            </p>
-            <p className="text-[10px] text-slate-500">
-              Stored in Supabase table <code className="text-slate-400">admin_users</code>.
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              Login credentials are verified live against your Supabase database table{" "}
+              <code className="text-amber-400 font-mono bg-slate-950 px-1 py-0.5 rounded">admin_users</code>. No hardcoded credentials are used.
             </p>
           </div>
         </div>

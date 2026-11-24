@@ -100,17 +100,21 @@ export default function PricingMatrixPage() {
             </div>
           </div>
 
-          <div className="w-full md:w-64 relative">
+          <div className="w-full md:w-80 relative">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
             <input
               type="text"
-              placeholder="Search route name..."
+              placeholder="Search route (e.g. Makkah, Jeddah, Madinah)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
             />
           </div>
         </div>
+
+        <p className="text-[11px] text-slate-400 -mt-2 px-1">
+          💡 Hint: Enter fixed transfer fares in SAR. Click checkmark or press Enter to commit rate to database.
+        </p>
 
         {/* Matrix Table */}
         <div className="bg-[#0c1220] border border-slate-800 rounded-2xl overflow-hidden shadow-sm">

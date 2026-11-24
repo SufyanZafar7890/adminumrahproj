@@ -270,17 +270,19 @@ export default function RoutesPage() {
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Descriptive name for customer route selection</p>
               </div>
 
               <div>
                 <label className="text-slate-300 font-semibold block mb-1">URL Slug</label>
                 <input
                   type="text"
-                  placeholder="jeddah-airport-to-makkah"
+                  placeholder="e.g. jeddah-airport-to-makkah"
                   value={formData.slug}
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono text-[11px]"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Lowercase hyphenated identifier for SEO URLs</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -289,20 +291,24 @@ export default function RoutesPage() {
                   <input
                     type="text"
                     required
+                    placeholder="e.g. Jeddah"
                     value={formData.origin_city}
                     onChange={(e) => setFormData({ ...formData, origin_city: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                   />
+                  <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Starting city or airport</p>
                 </div>
                 <div>
                   <label className="text-slate-300 font-semibold block mb-1">Destination City</label>
                   <input
                     type="text"
                     required
+                    placeholder="e.g. Makkah"
                     value={formData.destination_city}
                     onChange={(e) => setFormData({ ...formData, destination_city: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                   />
+                  <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Arrival city or hotel area</p>
                 </div>
               </div>
 
@@ -312,29 +318,35 @@ export default function RoutesPage() {
                   <input
                     type="number"
                     required
+                    placeholder="e.g. 95"
                     value={formData.distance_km}
                     onChange={(e) => setFormData({ ...formData, distance_km: Number(e.target.value) })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                   />
+                  <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Road distance in km</p>
                 </div>
                 <div>
                   <label className="text-slate-300 font-semibold block mb-1">Duration (mins)</label>
                   <input
                     type="number"
                     required
+                    placeholder="e.g. 60"
                     value={formData.duration_mins}
                     onChange={(e) => setFormData({ ...formData, duration_mins: Number(e.target.value) })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                   />
+                  <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Drive time in minutes</p>
                 </div>
                 <div>
                   <label className="text-slate-300 font-semibold block mb-1">Order</label>
                   <input
                     type="number"
+                    placeholder="e.g. 1"
                     value={formData.display_order}
                     onChange={(e) => setFormData({ ...formData, display_order: Number(e.target.value) })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                   />
+                  <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Display sequence</p>
                 </div>
               </div>
 

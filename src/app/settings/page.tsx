@@ -104,9 +104,32 @@ export default function SettingsPage() {
   };
 
   const handleValueChange = (key: string, value: string) => {
-    setSettings((prev) =>
-      prev.map((s) => (s.key === key ? { ...s, value } : s))
-    );
+    if (key === "whatsapp_number" || key === "phone_number" || key === "contact_phone") {
+      setSettings((prev) => {
+        // Ensure both whatsapp_number and phone_number exist and are kept in sync
+        const keysToSync = ["whatsapp_number", "phone_number"];
+        const updated = prev.map((s) =>
+          keysToSync.includes(s.key) || s.key === "contact_phone" ? { ...s, value } : s
+        );
+        for (const k of keysToSync) {
+          if (!updated.some((s) => s.key === k)) {
+            updated.push({
+              id: `set-${Date.now()}-${k}`,
+              key: k,
+              value,
+              label: k === "whatsapp_number" ? "Unified WhatsApp & Hotline" : "Hotline Phone Number",
+              category: "contact",
+              updated_at: new Date().toISOString(),
+            });
+          }
+        }
+        return updated;
+      });
+    } else {
+      setSettings((prev) =>
+        prev.map((s) => (s.key === key ? { ...s, value } : s))
+      );
+    }
   };
 
   const handleSaveSetting = async (key: string) => {
@@ -306,6 +329,9 @@ export default function SettingsPage() {
                   onChange={(e) => setSupabaseUrlInput(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-amber-500"
                 />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  💡 Hint: Supabase Project API URL from Project Settings &gt; API (e.g. https://xyz.supabase.co)
+                </p>
               </div>
 
               <div>
@@ -320,6 +346,9 @@ export default function SettingsPage() {
                   onChange={(e) => setSupabaseKeyInput(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-amber-500"
                 />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  💡 Hint: Public 'anon' JWT token for client-side database synchronization.
+                </p>
               </div>
             </div>
 
@@ -354,57 +383,77 @@ export default function SettingsPage() {
             <div className="flex items-center gap-2.5">
               <Phone className="w-4 h-4 text-amber-400" />
               <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                Direct Contact & WhatsApp Dispatch Numbers
+                Direct Contact & WhatsApp Dispatch (Unified)
               </h2>
             </div>
             <span className="text-xs text-slate-400">Reflected across the main website & WhatsApp buttons</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* WhatsApp Dispatch Number & Direct Contact */}
-            {settings
-              .filter(
-                (s) =>
-                  s.key === "whatsapp_number" ||
-                  s.key === "phone_number" ||
-                  s.key === "contact_phone" ||
-                  s.key === "support_email" ||
-                  s.key === "contact_email"
-              )
-              .map((s) => (
-                <div key={s.key} className="space-y-1.5 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                      {s.key === "whatsapp_number" && <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />}
-                      {(s.key === "phone_number" || s.key === "contact_phone") && <Phone className="w-3.5 h-3.5 text-amber-400" />}
-                      {(s.key === "support_email" || s.key === "contact_email") && <Mail className="w-3.5 h-3.5 text-blue-400" />}
-                      <span>{s.label || s.key}</span>
-                    </label>
-                    <span className="font-mono text-[10px] text-slate-500">{s.key}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={s.value}
-                      onChange={(e) => handleValueChange(s.key, e.target.value)}
-                      className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-amber-500"
-                    />
-                    <button
-                      onClick={() => handleSaveSetting(s.key)}
-                      disabled={savingKey === s.key}
-                      className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1 transition-all"
-                    >
-                      <Save className="w-3.5 h-3.5" />
-                      <span>{savingKey === s.key ? "..." : "Save"}</span>
-                    </button>
-                  </div>
-                  <p className="text-[11px] text-slate-400">
-                    {s.key === "whatsapp_number" && "Format with country code without + or spaces (e.g. 966591206299)"}
-                    {(s.key === "phone_number" || s.key === "contact_phone") && "Formatted phone display with spaces for pilgrim hotline"}
-                    {(s.key === "support_email" || s.key === "contact_email") && "Inbound support mailbox"}
-                  </p>
-                </div>
-              ))}
+            {/* Unified Contact & WhatsApp Hotline */}
+            <div className="space-y-1.5 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-amber-400" />
+                  <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Official Contact & WhatsApp Dispatch Hotline</span>
+                </label>
+                <span className="font-mono text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                  whatsapp_number &amp; phone_number
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="e.g. 923160424995 or 966591206299"
+                  value={settings.find((s) => s.key === "whatsapp_number")?.value || settings.find((s) => s.key === "phone_number")?.value || ""}
+                  onChange={(e) => handleValueChange("whatsapp_number", e.target.value)}
+                  className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-amber-500"
+                />
+                <button
+                  onClick={() => handleSaveSetting("whatsapp_number")}
+                  disabled={savingKey === "whatsapp_number"}
+                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1 transition-all"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{savingKey === "whatsapp_number" ? "..." : "Save"}</span>
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                💡 Hint: Single unified number powering all website phone call links, WhatsApp chat triggers, route inquiries, and booking dispatch. Enter with country code without '+' or spaces.
+              </p>
+            </div>
+
+            {/* Official Support Email */}
+            <div className="space-y-1.5 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Official Support & Dispatch Email</span>
+                </label>
+                <span className="font-mono text-[10px] text-slate-500">support_email</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="email"
+                  placeholder="e.g. dispatch@umrahtaxionline.com"
+                  value={settings.find((s) => s.key === "support_email")?.value || ""}
+                  onChange={(e) => handleValueChange("support_email", e.target.value)}
+                  className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-amber-500"
+                />
+                <button
+                  onClick={() => handleSaveSetting("support_email")}
+                  disabled={savingKey === "support_email"}
+                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1 transition-all"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{savingKey === "support_email" ? "..." : "Save"}</span>
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                💡 Hint: Primary customer inquiry and chauffeur booking notification mailbox displayed in headers &amp; footers.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -431,15 +480,19 @@ export default function SettingsPage() {
                   </div>
                   <textarea
                     rows={2}
+                    placeholder="e.g. Ash Shubaikah, Makkah 24231, Kingdom of Saudi Arabia"
                     value={s.value}
                     onChange={(e) => handleValueChange(s.key, e.target.value)}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
                   />
-                  <div className="flex justify-end">
+                  <div className="flex items-center justify-between pt-1">
+                    <p className="text-[11px] text-slate-400">
+                      💡 Hint: Physical dispatch office or headquarters address shown in site footer &amp; contact page.
+                    </p>
                     <button
                       onClick={() => handleSaveSetting(s.key)}
                       disabled={savingKey === s.key}
-                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1"
+                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1 shrink-0 ml-2"
                     >
                       <Save className="w-3.5 h-3.5" />
                       <span>{savingKey === s.key ? "Saving..." : "Save Address"}</span>
@@ -482,10 +535,31 @@ export default function SettingsPage() {
                     </div>
                     <textarea
                       rows={2}
+                      placeholder={
+                        s.key === "hero_heading"
+                          ? "e.g. Private Umrah Taxi With Zero Advance Deposit"
+                          : s.key === "hero_subheading"
+                          ? "e.g. Pre-book your sanitized private chauffeur..."
+                          : s.key === "sla_response_time"
+                          ? "e.g. 1 – 2 Minutes"
+                          : s.key === "tga_compliance_text"
+                          ? "e.g. Saudi Transport General Authority (TGA) Compliant..."
+                          : "Setting value..."
+                      }
                       value={s.value}
                       onChange={(e) => handleValueChange(s.key, e.target.value)}
                       className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
                     />
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      {s.key === "hero_heading" && "💡 Hint: Main high-impact headline displayed on homepage hero banner."}
+                      {s.key === "hero_subheading" && "💡 Hint: Value proposition explaining zero advance deposit and flight tracking."}
+                      {s.key === "sla_response_time" && "💡 Hint: Dispatch team expected response window (e.g. 1 – 2 Minutes)."}
+                      {s.key === "tga_compliance_text" && "💡 Hint: Regulatory licensing text for Saudi TGA compliance badge."}
+                      {s.key === "company_name" && "💡 Hint: Official brand name rendered on documents and headers."}
+                      {s.key === "founder_name" && "💡 Hint: Founder or chief executive signature."}
+                      {!["hero_heading", "hero_subheading", "sla_response_time", "tga_compliance_text", "company_name", "founder_name"].includes(s.key) &&
+                        "💡 Hint: Value dynamically rendered on customer frontend."}
+                    </p>
                   </div>
                   <div className="flex justify-end pt-2">
                     <button
@@ -532,6 +606,7 @@ export default function SettingsPage() {
                   onChange={(e) => setNewKey(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-amber-500"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: lowercase_key_with_underscores (e.g. airport_counter_number)</p>
               </div>
 
               <div>
@@ -543,6 +618,7 @@ export default function SettingsPage() {
                   onChange={(e) => setNewLabel(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Readable name displayed on admin cards</p>
               </div>
 
               <div>
@@ -550,11 +626,12 @@ export default function SettingsPage() {
                 <textarea
                   rows={2}
                   required
-                  placeholder="Value content"
+                  placeholder="e.g. +966 59 123 4567"
                   value={newValue}
                   onChange={(e) => setNewValue(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: String or JSON content stored in Supabase</p>
               </div>
 
               <div>
@@ -569,6 +646,7 @@ export default function SettingsPage() {
                   <option value="service">Service</option>
                   <option value="homepage">Homepage</option>
                 </select>
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Determines which section this setting appears under</p>
               </div>
             </div>
 

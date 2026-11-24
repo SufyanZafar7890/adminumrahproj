@@ -407,34 +407,60 @@ export const dataStore = {
   async updateSetting(key: string, value: string): Promise<void> {
     const settings = await this.getSettings();
     const index = settings.findIndex((s) => s.key === key);
-    if (index >= 0) {
-      settings[index] = { ...settings[index], value, updated_at: new Date().toISOString() };
+    // If saving contact/phone/whatsapp, keep them synchronized
+    if (key === "whatsapp_number" || key === "phone_number" || key === "contact_phone") {
+      const keysToSync = ["whatsapp_number", "phone_number", "contact_phone"];
+      for (const k of keysToSync) {
+        const idx = settings.findIndex((s) => s.key === k);
+        if (idx >= 0) {
+          settings[idx] = { ...settings[idx], value, updated_at: new Date().toISOString() };
+        } else {
+          settings.push({
+            id: `set-${Date.now()}-${k}`,
+            key: k,
+            value,
+            label: k === "whatsapp_number" ? "WhatsApp Dispatch Number" : "Hotline Phone Number",
+            category: "contact",
+            updated_at: new Date().toISOString(),
+          });
+        }
+      }
     } else {
-      settings.push({ id: `set-${Date.now()}`, key, value, label: key, category: "general", updated_at: new Date().toISOString() });
+      if (index >= 0) {
+        settings[index] = { ...settings[index], value, updated_at: new Date().toISOString() };
+      } else {
+        settings.push({ id: `set-${Date.now()}`, key, value, label: key, category: "general", updated_at: new Date().toISOString() });
+      }
     }
     setLocalStorage(STORAGE_KEYS.SETTINGS, settings);
 
     if (this.isLiveMode()) {
-      // 1. Try update first on matching key
-      const { data, error: updateError } = await supabase
-        .from("site_settings")
-        .update({ value, updated_at: new Date().toISOString() })
-        .eq("key", key)
-        .select();
+      const keysToUpdate =
+        key === "whatsapp_number" || key === "phone_number" || key === "contact_phone"
+          ? ["whatsapp_number", "phone_number"]
+          : [key];
 
-      if (updateError) {
-        console.error("Supabase settings update failed:", updateError);
-        throw new Error(`Supabase RLS/Update Error: ${updateError.message}`);
-      }
-
-      // 2. If row did not exist yet, insert it
-      if (!data || data.length === 0) {
-        const { error: insertError } = await supabase
+      for (const targetKey of keysToUpdate) {
+        // 1. Try update first on matching key
+        const { data, error: updateError } = await supabase
           .from("site_settings")
-          .insert([{ key, value, label: key, category: "general", updated_at: new Date().toISOString() }]);
-        if (insertError) {
-          console.error("Supabase settings insert failed:", insertError);
-          throw new Error(`Supabase Insert Error: ${insertError.message}`);
+          .update({ value, updated_at: new Date().toISOString() })
+          .eq("key", targetKey)
+          .select();
+
+        if (updateError) {
+          console.error(`Supabase settings update failed for ${targetKey}:`, updateError);
+        } else if (!data || data.length === 0) {
+          // 2. If row did not exist yet, insert it
+          await supabase.from("site_settings").insert([
+            {
+              key: targetKey,
+              value,
+              label: targetKey === "whatsapp_number" ? "WhatsApp Dispatch Number" : "Hotline Phone Number",
+              category: "contact",
+              updated_at: new Date().toISOString(),
+            },
+          ]);
         }
       }
     }
@@ -442,11 +468,34 @@ export const dataStore = {
 
   async saveAllSettings(items: SiteSetting[]): Promise<void> {
     const now = new Date().toISOString();
-    const updatedList = items.map((item) => ({ ...item, updated_at: now }));
+    
+    // Ensure whatsapp_number and phone_number have identical values
+    const whatsappItem = items.find((s) => s.key === "whatsapp_number");
+    const phoneItem = items.find((s) => s.key === "phone_number");
+    const unifiedVal = whatsappItem ? whatsappItem.value : (phoneItem ? phoneItem.value : null);
+
+    const normalizedItems = [...items];
+    if (unifiedVal !== null) {
+      if (whatsappItem) whatsappItem.value = unifiedVal;
+      if (phoneItem) {
+        phoneItem.value = unifiedVal;
+      } else {
+        normalizedItems.push({
+          id: `set-sync-phone`,
+          key: "phone_number",
+          value: unifiedVal,
+          label: "Hotline Phone Number",
+          category: "contact",
+          updated_at: now,
+        });
+      }
+    }
+
+    const updatedList = normalizedItems.map((item) => ({ ...item, updated_at: now }));
     setLocalStorage(STORAGE_KEYS.SETTINGS, updatedList);
 
     if (this.isLiveMode()) {
-      const updatePromises = items.map(async (item) => {
+      const updatePromises = normalizedItems.map(async (item) => {
         try {
           const { data, error } = await supabase
             .from("site_settings")
@@ -512,7 +561,7 @@ export const dataStore = {
     };
   },
 
-  // 10. AUTHENTICATION (Hardcoded Admin Credentials in Supabase with fallback)
+  // 10. AUTHENTICATION (Strict Database Verification against Supabase admin_users)
   async loginAdmin(username: string, password: string): Promise<{ success: boolean; message?: string }> {
     const cleanUser = username.trim();
     const cleanPass = password.trim();
@@ -521,17 +570,29 @@ export const dataStore = {
       return { success: false, message: "Please enter both username and password." };
     }
 
-    // 1. Check live Supabase public.admin_users table if configured
+    // Check live Supabase public.admin_users table
     if (this.isLiveMode()) {
       try {
         const { data, error } = await supabase
           .from("admin_users")
-          .select("id, username, role")
+          .select("id, username, role, is_active")
           .eq("username", cleanUser)
           .eq("password", cleanPass)
           .maybeSingle();
 
-        if (!error && data) {
+        if (error) {
+          console.error("Supabase admin auth error:", error);
+          return { success: false, message: `Database error: ${error.message}` };
+        }
+
+        if (data) {
+          if (data.is_active === false) {
+            return {
+              success: false,
+              message: "This admin account is currently disabled. Contact system administrator.",
+            };
+          }
+
           const session = {
             id: data.id,
             username: data.username,
@@ -542,27 +603,15 @@ export const dataStore = {
           setLocalStorage(STORAGE_KEYS.AUTH, session);
           return { success: true };
         }
-      } catch (err) {
-        console.warn("Supabase auth check note:", err);
+      } catch (err: any) {
+        console.error("Supabase auth check exception:", err);
+        return { success: false, message: `Authentication connection failure: ${err.message || err}` };
       }
-    }
-
-    // 2. Default hardcoded admin credentials fallback
-    if (cleanUser === "admin" && cleanPass === "umrah@admin2026") {
-      const session = {
-        id: "usr-admin-default",
-        username: "admin",
-        role: "superadmin",
-        source: "system_default",
-        token: "def-auth-" + Date.now(),
-      };
-      setLocalStorage(STORAGE_KEYS.AUTH, session);
-      return { success: true };
     }
 
     return {
       success: false,
-      message: "Invalid credentials. Please verify your username and password.",
+      message: "Invalid admin credentials. Account not found in Supabase admin_users table.",
     };
   },
 

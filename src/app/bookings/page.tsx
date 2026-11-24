@@ -397,10 +397,12 @@ export default function BookingsPage() {
                 <input
                   type="text"
                   required
+                  placeholder="e.g. Dr. Tariq Mahmood"
                   value={formData.customer_name}
                   onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Lead passenger pilgrim name</p>
               </div>
 
               <div>
@@ -408,40 +410,48 @@ export default function BookingsPage() {
                 <input
                   type="text"
                   required
+                  placeholder="e.g. 966501234567 or 923160424995"
                   value={formData.customer_phone}
                   onChange={(e) => setFormData({ ...formData, customer_phone: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Passenger mobile with country code for WhatsApp</p>
               </div>
 
               <div className="col-span-2">
                 <label className="text-slate-400 block mb-1">Route</label>
                 <input
                   type="text"
+                  placeholder="e.g. Jeddah Airport (KAIA) to Makkah Hotel"
                   value={formData.route_title}
                   onChange={(e) => setFormData({ ...formData, route_title: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Designated pickup and dropoff corridor</p>
               </div>
 
               <div>
                 <label className="text-slate-400 block mb-1">Vehicle</label>
                 <input
                   type="text"
+                  placeholder="e.g. GMC Yukon XL 2025"
                   value={formData.vehicle_name}
                   onChange={(e) => setFormData({ ...formData, vehicle_name: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Assigned chauffeur fleet vehicle</p>
               </div>
 
               <div>
                 <label className="text-slate-400 block mb-1">Fare (SAR)</label>
                 <input
                   type="number"
+                  placeholder="e.g. 250"
                   value={formData.estimated_price_sar}
                   onChange={(e) => setFormData({ ...formData, estimated_price_sar: Number(e.target.value) })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-bold text-emerald-400"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Agreed fare in SAR, payable on arrival</p>
               </div>
 
               <div>
@@ -452,36 +462,43 @@ export default function BookingsPage() {
                   onChange={(e) => setFormData({ ...formData, travel_date: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Scheduled date of transfer</p>
               </div>
 
               <div>
                 <label className="text-slate-400 block mb-1">Flight Number</label>
                 <input
                   type="text"
+                  placeholder="e.g. SV-104 or PK-741"
                   value={formData.flight_number}
                   onChange={(e) => setFormData({ ...formData, flight_number: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Flight code for live radar delay tracking</p>
               </div>
 
               <div>
                 <label className="text-slate-400 block mb-1">Passengers (Pax)</label>
                 <input
                   type="number"
+                  placeholder="e.g. 4"
                   value={formData.passengers}
                   onChange={(e) => setFormData({ ...formData, passengers: Number(e.target.value) })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Total count of passengers</p>
               </div>
 
               <div>
                 <label className="text-slate-400 block mb-1">Luggage Bags</label>
                 <input
                   type="number"
+                  placeholder="e.g. 4"
                   value={formData.luggage}
                   onChange={(e) => setFormData({ ...formData, luggage: Number(e.target.value) })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Total check-in suitcases</p>
               </div>
 
               <div className="col-span-2">
@@ -497,16 +514,19 @@ export default function BookingsPage() {
                   <option value="completed">Completed</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Operational dispatch progression stage</p>
               </div>
 
               <div className="col-span-2">
                 <label className="text-slate-400 block mb-1">Pilgrim Notes</label>
                 <textarea
                   rows={2}
+                  placeholder="e.g. Free Miqat stop requested at Masjid Aisha..."
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Special passenger instructions or hotel address</p>
               </div>
             </div>
 
@@ -558,6 +578,7 @@ export default function BookingsPage() {
                   onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Lead pilgrim name</p>
               </div>
 
               <div>
@@ -565,11 +586,12 @@ export default function BookingsPage() {
                 <input
                   type="text"
                   required
-                  placeholder="+966 50 123 4567"
+                  placeholder="e.g. 966501234567 or 923160424995"
                   value={formData.customer_phone}
                   onChange={(e) => setFormData({ ...formData, customer_phone: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Country code + phone without + or spaces</p>
               </div>
 
               <div className="col-span-2">
@@ -592,6 +614,7 @@ export default function BookingsPage() {
                     </option>
                   ))}
                 </select>
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Designated holy corridor</p>
               </div>
 
               <div>
@@ -607,6 +630,7 @@ export default function BookingsPage() {
                     </option>
                   ))}
                 </select>
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Assigned fleet vehicle model</p>
               </div>
 
               <div>
@@ -614,10 +638,12 @@ export default function BookingsPage() {
                 <input
                   type="number"
                   required
+                  placeholder="e.g. 250"
                   value={formData.estimated_price_sar}
                   onChange={(e) => setFormData({ ...formData, estimated_price_sar: Number(e.target.value) })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-bold text-emerald-400"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Total fixed price in SAR</p>
               </div>
 
               <div>
@@ -629,17 +655,19 @@ export default function BookingsPage() {
                   onChange={(e) => setFormData({ ...formData, travel_date: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Scheduled journey date</p>
               </div>
 
               <div>
                 <label className="text-slate-400 block mb-1">Pickup Time</label>
                 <input
                   type="text"
-                  placeholder="e.g. 14:30 or As per flight"
+                  placeholder="e.g. 14:30 or As per flight landing"
                   value={formData.pickup_time}
                   onChange={(e) => setFormData({ ...formData, pickup_time: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Chauffeur arrival time</p>
               </div>
 
               <div>
@@ -651,6 +679,7 @@ export default function BookingsPage() {
                   onChange={(e) => setFormData({ ...formData, flight_number: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: For automated flight radar delay tracking</p>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
@@ -658,19 +687,23 @@ export default function BookingsPage() {
                   <label className="text-slate-400 block mb-1">Pax</label>
                   <input
                     type="number"
+                    placeholder="e.g. 4"
                     value={formData.passengers}
                     onChange={(e) => setFormData({ ...formData, passengers: Number(e.target.value) })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                   />
+                  <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Passengers</p>
                 </div>
                 <div>
                   <label className="text-slate-400 block mb-1">Bags</label>
                   <input
                     type="number"
+                    placeholder="e.g. 4"
                     value={formData.luggage}
                     onChange={(e) => setFormData({ ...formData, luggage: Number(e.target.value) })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                   />
+                  <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Suitcases</p>
                 </div>
               </div>
 
@@ -678,11 +711,12 @@ export default function BookingsPage() {
                 <label className="text-slate-400 block mb-1">Special Notes / Miqat Stop / Hotel</label>
                 <textarea
                   rows={2}
-                  placeholder="Free Miqat stop requested, arrival terminal 1..."
+                  placeholder="e.g. Free Miqat stop requested at Masjid Aisha..."
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Passenger requests or hotel dropoff details</p>
               </div>
             </div>
 

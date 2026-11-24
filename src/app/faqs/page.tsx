@@ -215,6 +215,7 @@ export default function FAQsPage() {
                   onChange={(e) => setFormData({ ...formData, question: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Frequently asked question by pilgrims</p>
               </div>
 
               <div>
@@ -222,11 +223,12 @@ export default function FAQsPage() {
                 <textarea
                   rows={4}
                   required
-                  placeholder="e.g. No, we require zero advance deposit. You pay your chauffeur upon arrival..."
+                  placeholder="e.g. No, we require zero advance deposit. You pay your chauffeur upon safe arrival..."
                   value={formData.answer}
                   onChange={(e) => setFormData({ ...formData, answer: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Reassuring and detailed solution text</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -234,20 +236,23 @@ export default function FAQsPage() {
                   <label className="text-slate-300 font-semibold block mb-1">Category</label>
                   <input
                     type="text"
-                    placeholder="Booking & Payments"
+                    placeholder="e.g. Booking & Payments"
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                   />
+                  <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Filter tab name</p>
                 </div>
                 <div>
                   <label className="text-slate-300 font-semibold block mb-1">Display Order</label>
                   <input
                     type="number"
+                    placeholder="e.g. 1"
                     value={formData.display_order}
                     onChange={(e) => setFormData({ ...formData, display_order: Number(e.target.value) })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                   />
+                  <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Sort priority</p>
                 </div>
               </div>
 

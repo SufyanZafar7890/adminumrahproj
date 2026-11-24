@@ -231,6 +231,7 @@ export default function DriversPage() {
                   onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Licensed driver's official full name</p>
               </div>
 
               <div>
@@ -238,11 +239,12 @@ export default function DriversPage() {
                 <input
                   type="text"
                   required
-                  placeholder="+966 50 123 4567"
+                  placeholder="e.g. 966501234567"
                   value={formData.phone_number}
                   onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono"
                 />
+                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Driver mobile with country code for dispatch</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -250,21 +252,23 @@ export default function DriversPage() {
                   <label className="text-slate-300 font-semibold block mb-1">Vehicle Model</label>
                   <input
                     type="text"
-                    placeholder="Toyota Camry 2025"
+                    placeholder="e.g. Toyota Camry 2025"
                     value={formData.vehicle_model}
                     onChange={(e) => setFormData({ ...formData, vehicle_model: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                   />
+                  <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Assigned operational car</p>
                 </div>
                 <div>
                   <label className="text-slate-300 font-semibold block mb-1">Plate Number</label>
                   <input
                     type="text"
-                    placeholder="KSA 4589"
+                    placeholder="e.g. KSA 4589"
                     value={formData.vehicle_plate}
                     onChange={(e) => setFormData({ ...formData, vehicle_plate: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white"
                   />
+                  <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Saudi traffic registration plate</p>
                 </div>
               </div>
 
