@@ -16,6 +16,10 @@ import {
   CheckCircle2,
   AlertCircle,
   RotateCcw,
+  Users,
+  Building2,
+  Award,
+  FileText,
 } from "lucide-react";
 import { dataStore } from "@/lib/storage";
 import { SiteSetting } from "@/types";
@@ -35,12 +39,6 @@ export default function SettingsPage() {
   const [newCategory, setNewCategory] = useState<"general" | "contact" | "service" | "homepage">("contact");
   const [showAddModal, setShowAddModal] = useState(false);
 
-  // Supabase connection credentials
-  const [supabaseUrlInput, setSupabaseUrlInput] = useState("");
-  const [supabaseKeyInput, setSupabaseKeyInput] = useState("");
-  const [isTestingSupabase, setIsTestingSupabase] = useState(false);
-  const [supabaseStatusMsg, setSupabaseStatusMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
-
   const loadSettings = async () => {
     setLoading(true);
     try {
@@ -55,53 +53,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     loadSettings();
-    const creds = getSupabaseCredentials();
-    setSupabaseUrlInput(creds.url);
-    if (!creds.key.includes("placeholder")) {
-      setSupabaseKeyInput(creds.key);
-    }
   }, []);
-
-  const handleConnectSupabase = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!supabaseKeyInput.trim()) {
-      setSupabaseStatusMsg({ type: "error", text: "Please enter your Supabase Anon Public Key." });
-      return;
-    }
-
-    setIsTestingSupabase(true);
-    setSupabaseStatusMsg(null);
-
-    try {
-      const cleanUrl = supabaseUrlInput.trim() || "https://lbfmxgnxihujjcrzhjzn.supabase.co";
-      const cleanKey = supabaseKeyInput.trim();
-      saveSupabaseCredentials(cleanUrl, cleanKey);
-
-      // Verify connection by querying site_settings table
-      const client = getSupabase();
-      const { data, error } = await client.from("site_settings").select("key").limit(1);
-
-      if (!error) {
-        setSupabaseStatusMsg({
-          type: "success",
-          text: "✅ Connected to Supabase PostgreSQL successfully! Live mode is now ACTIVE.",
-        });
-        await loadSettings();
-      } else {
-        setSupabaseStatusMsg({
-          type: "error",
-          text: `Connection failed: ${error.message}. Please verify the Anon key or run the setup SQL script in Supabase.`,
-        });
-      }
-    } catch (err: any) {
-      setSupabaseStatusMsg({
-        type: "error",
-        text: `Error connecting: ${err.message}`,
-      });
-    } finally {
-      setIsTestingSupabase(false);
-    }
-  };
 
   const handleValueChange = (key: string, value: string) => {
     if (key === "whatsapp_number" || key === "phone_number" || key === "contact_phone") {
@@ -270,7 +222,7 @@ export default function SettingsPage() {
           <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs rounded-xl flex items-center gap-2 animate-fadeIn">
             <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
             <div className="flex-1">
-              <span className="font-bold block">Supabase Permission / RLS Error:</span>
+              <span className="font-bold block">Database Permission / RLS Error:</span>
               <span>{saveErrorMsg}</span>
               <p className="mt-1 text-[11px] text-rose-400/90">
                 Tip: Run the RLS Policy fix query in your Supabase SQL Editor to grant update permissions.
@@ -278,104 +230,6 @@ export default function SettingsPage() {
             </div>
           </div>
         )}
-
-        {/* Supabase Live API Connection Card */}
-        <div className="bg-[#0c1220] border border-slate-800 rounded-2xl overflow-hidden p-6 space-y-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
-            <div className="flex items-center gap-2.5">
-              <Database className="w-5 h-5 text-amber-400" />
-              <div>
-                <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                  Supabase PostgreSQL Live Database Gateway
-                </h2>
-                <p className="text-xs text-slate-400">
-                  Connect your live Supabase credentials to switch from Demo mode to Live mode
-                </p>
-              </div>
-            </div>
-            <div
-              className={`px-3 py-1 rounded-xl text-xs font-bold border flex items-center gap-1.5 ${
-                isLive
-                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                  : "bg-amber-500/10 text-amber-400 border-amber-500/30 animate-pulse"
-              }`}
-            >
-              <span className={`w-2 h-2 rounded-full ${isLive ? "bg-emerald-400 animate-ping" : "bg-amber-400"}`}></span>
-              <span>{isLive ? "● LIVE DATABASE ACTIVE" : "○ DEMO STORAGE MODE"}</span>
-            </div>
-          </div>
-
-          {supabaseStatusMsg && (
-            <div
-              className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
-                supabaseStatusMsg.type === "success"
-                  ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-300"
-                  : "bg-rose-500/10 border border-rose-500/30 text-rose-300"
-              }`}
-            >
-              <span>{supabaseStatusMsg.text}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleConnectSupabase} className="space-y-3 text-xs">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-slate-300 font-bold block mb-1">Supabase Project URL</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="https://lbfmxgnxihujjcrzhjzn.supabase.co"
-                  value={supabaseUrlInput}
-                  onChange={(e) => setSupabaseUrlInput(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-amber-500"
-                />
-                <p className="text-[11px] text-slate-400 mt-1">
-                  💡 Hint: Supabase Project API URL from Project Settings &gt; API (e.g. https://xyz.supabase.co)
-                </p>
-              </div>
-
-              <div>
-                <label className="text-slate-300 font-bold block mb-1">
-                  Supabase Anon Public Key (anon key)
-                </label>
-                <input
-                  type="password"
-                  required
-                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                  value={supabaseKeyInput}
-                  onChange={(e) => setSupabaseKeyInput(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-amber-500"
-                />
-                <p className="text-[11px] text-slate-400 mt-1">
-                  💡 Hint: Public 'anon' JWT token for client-side database synchronization.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2">
-              <p className="text-[11px] text-slate-500">
-                Pasted key is securely stored in your browser session and connects directly to your PostgreSQL database.
-              </p>
-              <button
-                type="submit"
-                disabled={isTestingSupabase}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-600/20 transition-all cursor-pointer disabled:opacity-60 shrink-0"
-              >
-                {isTestingSupabase ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Testing Connection...</span>
-                  </>
-                ) : (
-                  <>
-                    <Database className="w-3.5 h-3.5" />
-                    <span>Connect & Switch to Supabase Live</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
 
         {/* Category: Contact & Communication */}
         <div className="bg-[#0c1220] border border-slate-800 rounded-2xl overflow-hidden p-6 space-y-6">
@@ -457,6 +311,284 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* Category: Brand Identity, Founder & About Us Story */}
+        <div className="bg-[#0c1220] border border-slate-800 rounded-2xl overflow-hidden p-6 space-y-6">
+          <div className="border-b border-slate-800 pb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <Building2 className="w-4 h-4 text-amber-400" />
+              <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+                Brand Identity, Founder &amp; About Us Story
+              </h2>
+            </div>
+            <span className="text-xs text-slate-400">Dynamically reflected on the About Us page, Navbar &amp; Footer</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Founder Name */}
+            <div className="space-y-1.5 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Founder / Chief Executive Name</span>
+                </label>
+                <span className="font-mono text-[10px] text-slate-500">founder_name</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="e.g. Sufyan Zafar"
+                  value={settings.find((s) => s.key === "founder_name")?.value || ""}
+                  onChange={(e) => handleValueChange("founder_name", e.target.value)}
+                  className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                />
+                <button
+                  onClick={() => handleSaveSetting("founder_name")}
+                  disabled={savingKey === "founder_name"}
+                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1 transition-all"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{savingKey === "founder_name" ? "..." : "Save"}</span>
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                💡 Hint: Founder name dynamically reflected across the About Us story and executive sign-offs.
+              </p>
+            </div>
+
+            {/* Operating Company / Brand Name */}
+            <div className="space-y-1.5 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Operating Brand / Company Name</span>
+                </label>
+                <span className="font-mono text-[10px] text-slate-500">company_name</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="e.g. Umrah Taxi Online"
+                  value={settings.find((s) => s.key === "company_name")?.value || ""}
+                  onChange={(e) => handleValueChange("company_name", e.target.value)}
+                  className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                />
+                <button
+                  onClick={() => handleSaveSetting("company_name")}
+                  disabled={savingKey === "company_name"}
+                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1 transition-all"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{savingKey === "company_name" ? "..." : "Save"}</span>
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                💡 Hint: Main brand name rendered in website navbar, footers, and official documents.
+              </p>
+            </div>
+
+            {/* About Mission Headline */}
+            <div className="space-y-1.5 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                  <Award className="w-3.5 h-3.5 text-amber-400" />
+                  <span>About Us Mission Headline</span>
+                </label>
+                <span className="font-mono text-[10px] text-slate-500">about_mission_title</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="e.g. Serving the Guests of Allah"
+                  value={settings.find((s) => s.key === "about_mission_title")?.value || ""}
+                  onChange={(e) => handleValueChange("about_mission_title", e.target.value)}
+                  className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                />
+                <button
+                  onClick={() => handleSaveSetting("about_mission_title")}
+                  disabled={savingKey === "about_mission_title"}
+                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1 transition-all"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{savingKey === "about_mission_title" ? "..." : "Save"}</span>
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                💡 Hint: Primary headline displayed on the customer About Us page.
+              </p>
+            </div>
+
+            {/* Founding Story Heading */}
+            <div className="space-y-1.5 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Founding Story Heading</span>
+                </label>
+                <span className="font-mono text-[10px] text-slate-500">about_story_title</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="e.g. Our Founding Story"
+                  value={settings.find((s) => s.key === "about_story_title")?.value || ""}
+                  onChange={(e) => handleValueChange("about_story_title", e.target.value)}
+                  className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                />
+                <button
+                  onClick={() => handleSaveSetting("about_story_title")}
+                  disabled={savingKey === "about_story_title"}
+                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1 transition-all"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{savingKey === "about_story_title" ? "..." : "Save"}</span>
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                💡 Hint: Title of the narrative section on About Us page.
+              </p>
+            </div>
+
+            {/* About Mission Narrative Text */}
+            <div className="col-span-1 md:col-span-2 space-y-1.5 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-200">About Us Mission Statement</label>
+                <span className="font-mono text-[10px] text-slate-500">about_mission_text</span>
+              </div>
+              <textarea
+                rows={2}
+                placeholder="Headquartered in Ash Shubaikah, Makkah, adjacent to the Holy Mosque..."
+                value={settings.find((s) => s.key === "about_mission_text")?.value || ""}
+                onChange={(e) => handleValueChange("about_mission_text", e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+              />
+              <div className="flex items-center justify-between pt-1">
+                <p className="text-[11px] text-slate-400">
+                  💡 Hint: Main introductory paragraph on About Us page.
+                </p>
+                <button
+                  onClick={() => handleSaveSetting("about_mission_text")}
+                  disabled={savingKey === "about_mission_text"}
+                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1 shrink-0 ml-2"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{savingKey === "about_mission_text" ? "..." : "Save"}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Founding Story Paragraph 1 */}
+            <div className="space-y-1.5 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-200">Founding Story Paragraph 1</label>
+                <span className="font-mono text-[10px] text-slate-500">about_story_text_1</span>
+              </div>
+              <textarea
+                rows={3}
+                placeholder="Founded by our team, our service started with a simple belief..."
+                value={settings.find((s) => s.key === "about_story_text_1")?.value || ""}
+                onChange={(e) => handleValueChange("about_story_text_1", e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+              />
+              <div className="flex items-center justify-between pt-1">
+                <p className="text-[11px] text-slate-400">
+                  💡 Hint: First narrative block in the story box.
+                </p>
+                <button
+                  onClick={() => handleSaveSetting("about_story_text_1")}
+                  disabled={savingKey === "about_story_text_1"}
+                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1 shrink-0 ml-2"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{savingKey === "about_story_text_1" ? "..." : "Save"}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Founding Story Paragraph 2 */}
+            <div className="space-y-1.5 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-200">Founding Story Paragraph 2</label>
+                <span className="font-mono text-[10px] text-slate-500">about_story_text_2</span>
+              </div>
+              <textarea
+                rows={3}
+                placeholder="Unlike automated ride apps that apply high surge pricing..."
+                value={settings.find((s) => s.key === "about_story_text_2")?.value || ""}
+                onChange={(e) => handleValueChange("about_story_text_2", e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+              />
+              <div className="flex items-center justify-between pt-1">
+                <p className="text-[11px] text-slate-400">
+                  💡 Hint: Second narrative block highlighting pilgrim guarantees.
+                </p>
+                <button
+                  onClick={() => handleSaveSetting("about_story_text_2")}
+                  disabled={savingKey === "about_story_text_2"}
+                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1 shrink-0 ml-2"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{savingKey === "about_story_text_2" ? "..." : "Save"}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Drivers Stat & Pilgrims Stat */}
+            <div className="space-y-1.5 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-200">Verified Chauffeurs Count Stat</label>
+                <span className="font-mono text-[10px] text-slate-500">about_stat_drivers</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="e.g. 50+"
+                  value={settings.find((s) => s.key === "about_stat_drivers")?.value || ""}
+                  onChange={(e) => handleValueChange("about_stat_drivers", e.target.value)}
+                  className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                />
+                <button
+                  onClick={() => handleSaveSetting("about_stat_drivers")}
+                  disabled={savingKey === "about_stat_drivers"}
+                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1 transition-all"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{savingKey === "about_stat_drivers" ? "..." : "Save"}</span>
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                💡 Hint: Number displayed in the driver fleet stats metric box.
+              </p>
+            </div>
+
+            <div className="space-y-1.5 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-200">Pilgrims Transported Count Stat</label>
+                <span className="font-mono text-[10px] text-slate-500">about_stat_pilgrims</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="e.g. 10,000+"
+                  value={settings.find((s) => s.key === "about_stat_pilgrims")?.value || ""}
+                  onChange={(e) => handleValueChange("about_stat_pilgrims", e.target.value)}
+                  className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                />
+                <button
+                  onClick={() => handleSaveSetting("about_stat_pilgrims")}
+                  disabled={savingKey === "about_stat_pilgrims"}
+                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1 transition-all"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{savingKey === "about_stat_pilgrims" ? "..." : "Save"}</span>
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                💡 Hint: Total pilgrim trust metric counter.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Category: Physical Branch Addresses */}
         <div className="bg-[#0c1220] border border-slate-800 rounded-2xl overflow-hidden p-6 space-y-6">
           <div className="border-b border-slate-800 pb-3 flex items-center justify-between">
@@ -520,6 +652,9 @@ export default function SettingsPage() {
               .filter(
                 (s) =>
                   !s.key.includes("address") &&
+                  !s.key.startsWith("about_") &&
+                  s.key !== "founder_name" &&
+                  s.key !== "company_name" &&
                   s.key !== "whatsapp_number" &&
                   s.key !== "contact_phone" &&
                   s.key !== "contact_email" &&

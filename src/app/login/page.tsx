@@ -95,7 +95,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-4 text-xs">
+          <form onSubmit={handleLogin} autoComplete="off" className="space-y-4 text-xs">
             {/* Username Input */}
             <div className="space-y-1.5">
               <label className="text-slate-300 font-bold block">Admin Username</label>
@@ -104,14 +104,15 @@ export default function LoginPage() {
                 <input
                   type="text"
                   required
-                  placeholder="Enter admin username (e.g. admin)..."
+                  autoComplete="off"
+                  placeholder="Enter admin username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-white font-medium focus:outline-none focus:border-amber-500"
                 />
               </div>
               <p className="text-[11px] text-slate-400">
-                💡 Hint: Enter your database administrator username registered in Supabase.
+                💡 Hint: Enter your administrator username registered in Supabase.
               </p>
             </div>
 
@@ -123,7 +124,8 @@ export default function LoginPage() {
                 <input
                   type={showPassword ? "text" : "password"}
                   required
-                  placeholder="Enter your secure password..."
+                  autoComplete="new-password"
+                  placeholder="Enter password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-10 py-2.5 text-white font-mono focus:outline-none focus:border-amber-500"
