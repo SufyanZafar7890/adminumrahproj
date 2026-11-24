@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Car,
   Plus,
@@ -12,16 +12,27 @@ import {
   Briefcase,
   ExternalLink,
   Save,
+  Upload,
+  Image as ImageIcon,
+  Loader2,
+  AlertCircle,
+  Camera,
 } from "lucide-react";
 import { dataStore } from "@/lib/storage";
 import { Vehicle } from "@/types";
 import { AdminHeader } from "@/components/layout/AdminHeader";
+import { getSupabase } from "@/lib/supabase/client";
 
 export default function VehiclesPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
+  const [showManualUrl, setShowManualUrl] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [formData, setFormData] = useState<Partial<Vehicle>>({
     name: "",
@@ -54,12 +65,15 @@ export default function VehiclesPage() {
 
   const openAddModal = () => {
     setEditingVehicle(null);
+    setUploadError(null);
+    setUploadSuccess(null);
+    setShowManualUrl(false);
     setFormData({
       name: "",
       category: "Sedan",
       max_passengers: 4,
       max_luggage: 2,
-      image_url: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=600&q=80",
+      image_url: "",
       features: ["Air Conditioned", "Dual Airbags", "Spacious Legroom"],
       display_order: vehicles.length + 1,
       is_active: true,
@@ -70,9 +84,58 @@ export default function VehiclesPage() {
 
   const openEditModal = (v: Vehicle) => {
     setEditingVehicle(v);
+    setUploadError(null);
+    setUploadSuccess(null);
+    setShowManualUrl(false);
     setFormData(v);
     setFeaturesInput((v.features || []).join(", "));
     setIsModalOpen(true);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Please select a valid image file (JPG, PNG, WebP).");
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadError(null);
+    setUploadSuccess(null);
+
+    try {
+      const cleanFileName = `veh_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+      const filePath = `fleet/${cleanFileName}`;
+
+      const client = getSupabase();
+      const { data, error } = await client.storage
+        .from("vehicles")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: true,
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      const { data: publicData } = client.storage
+        .from("vehicles")
+        .getPublicUrl(filePath);
+
+      const publicUrl = publicData?.publicUrl || "";
+      setFormData((prev) => ({ ...prev, image_url: publicUrl }));
+      setUploadSuccess("Photo uploaded directly to Supabase 'vehicles' bucket successfully!");
+    } catch (err: any) {
+      console.error("Vehicle image upload error:", err);
+      setUploadError(
+        err.message || "Failed to upload photo to Supabase 'vehicles' bucket. Make sure the storage bucket policy is created."
+      );
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleToggleActive = async (v: Vehicle) => {
@@ -327,17 +390,133 @@ export default function VehiclesPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="text-slate-300 font-semibold block mb-1">Image URL</label>
+              {/* Vehicle Photo Upload (Supabase Storage: vehicles bucket) */}
+              <div className="space-y-2 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+                <div className="flex items-center justify-between">
+                  <label className="text-slate-300 font-semibold block flex items-center gap-1.5">
+                    <Camera className="w-4 h-4 text-amber-400" />
+                    <span>Vehicle Image (Supabase Bucket: vehicles) *</span>
+                  </label>
+                  {formData.image_url && (
+                    <span className="text-[10px] text-emerald-400 font-mono bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" />
+                      <span>Ready</span>
+                    </span>
+                  )}
+                </div>
+
+                {/* Upload Status / Error Messages */}
+                {uploadError && (
+                  <div className="p-2.5 bg-rose-500/10 border border-rose-500/30 text-rose-300 text-[11px] rounded-lg flex items-center gap-1.5">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                    <span>{uploadError}</span>
+                  </div>
+                )}
+
+                {uploadSuccess && (
+                  <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px] rounded-lg flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                    <span>{uploadSuccess}</span>
+                  </div>
+                )}
+
+                {/* Hidden File Input */}
                 <input
-                  type="text"
-                  required
-                  placeholder="https://images.unsplash.com/..."
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono text-[11px]"
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
                 />
-                <p className="text-[10px] text-slate-400 mt-0.5">💡 Hint: Direct image web link for fleet showcase cards</p>
+
+                {/* Live Image Preview if uploaded / exists */}
+                {formData.image_url ? (
+                  <div className="space-y-2">
+                    <div className="relative w-full h-36 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 group">
+                      <img
+                        src={formData.image_url}
+                        alt="Vehicle Preview"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=600";
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploading}
+                          className="px-3 py-1.5 bg-amber-500 text-slate-950 font-bold text-xs rounded-lg hover:bg-amber-400 flex items-center gap-1 cursor-pointer"
+                        >
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>Replace Photo</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono truncate px-1">
+                      <span className="truncate max-w-[280px]">{formData.image_url}</span>
+                      <button
+                        type="button"
+                        onClick={() => setShowManualUrl(!showManualUrl)}
+                        className="text-amber-400 hover:underline shrink-0 ml-2"
+                      >
+                        {showManualUrl ? "Hide URL" : "Edit URL"}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-slate-700 hover:border-amber-500/60 rounded-xl p-5 text-center cursor-pointer transition-colors bg-slate-950/50 group"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-slate-800 group-hover:bg-amber-500/10 text-slate-400 group-hover:text-amber-400 flex items-center justify-center mx-auto mb-2 transition-colors">
+                      <Upload className="w-5 h-5" />
+                    </div>
+                    <p className="text-xs font-bold text-white">Click to Upload Vehicle Photo</p>
+                    <p className="text-[10px] text-slate-500 mt-0.5">Supports JPG, PNG, WebP up to 10MB</p>
+                  </div>
+                )}
+
+                {/* Upload Button */}
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="w-full py-2 px-3 bg-slate-800 hover:bg-slate-700 active:scale-[0.99] border border-slate-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
+                  >
+                    {isUploading ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
+                        <span>Uploading to Supabase 'vehicles' bucket...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-3.5 h-3.5 text-amber-400" />
+                        <span>{formData.image_url ? "Choose Different Image File" : "Choose Image File from Computer / Mobile"}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {showManualUrl && (
+                  <div className="pt-2">
+                    <label className="text-[11px] text-slate-400 block mb-1">Direct Storage Image URL</label>
+                    <input
+                      type="text"
+                      placeholder="https://..."
+                      value={formData.image_url}
+                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-white font-mono text-[10px] focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                )}
+
+                <p className="text-[10px] text-slate-400">
+                  💡 Hint: Uploads directly to Supabase storage bucket <code className="text-amber-400">vehicles</code>. The uploaded photo will instantly reflect on the public customer site and in fleet cards.
+                </p>
               </div>
 
               <div>
